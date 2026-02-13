@@ -1,0 +1,68 @@
+BIT502 Assessment 3 – Marking schedule reference
+================================================
+
+TASK 1 PART A – Wireframes + explanation (10 marks total)
+
+1) Creating forms and wireframes (5 marks)
+   • 4–5: All 5 forms well designed; UI designer could interpret without ambiguity; clear navigation; wireframes clear and readable.
+   • 3.5: All 5 designed and created; understandable with enough detail to build GUI; navigation clear; wireframes created in another medium (NOT screenshots of final GUI).
+   • 2.5–3: All 5 designed; enough detail to roughly build GUI; wireframes used screenshots of final GUI (deduction).
+   • 2: All 5 designed but rough guideline only; difficult to understand or lack detail.
+   • 1–1.5: Fewer than 5 forms, or forms have errors and are not adequate to build UI.
+
+2) Explain usable and accessible (5 marks)
+   • 4–5: Logical explanation; justified with reference to other usable/accessible wireframes; explicitly state wireframes are usable and accessible.
+   • 3.5: Logical explanation; state wireframes are usable and accessible.
+   • 2.5–3: Logical explanation (less detail / justification).
+   • 2: Explanation insufficient to prove usability or accessibility.
+   • 1–1.5: Inaccurate explanation.
+
+---
+
+TASK 1 PART B – Five forms (20 marks)
+
+   • 17–20: All forms well-designed, good UX, fully functional, accessible, free of interface/navigation errors.
+   • 14–16: Minor inaccuracies in UI; all necessary elements present; forms perform without major issues.
+   • 10–13: All necessary elements present; basic functionality; minor errors or UX challenges.
+   • 8–9: Most forms completed; some elements missing or one form missing.
+   • 1–7: One or more forms started but mostly incomplete.
+
+---
+
+TASK 2 PART A – Main menu navigation (10 marks)
+
+   • 8–10: Navigation code accurate for each form; menu fully functional; good programming practices.
+   • 6.5–7.5: Navigation for each form with one or two errors.
+   • 5–6: Navigation for each form; some functionality missing or minor errors; some practices overlooked.
+   • 4–4.5: Navigation added but errors lead to inaccurate navigation; many practices missed.
+   • 1–3.5: Navigation not added for all forms; multiple errors; mostly poor practices.
+
+---
+
+TASK 2 PART B – Membership form (20 marks)
+
+   • 16–20: All expected functions without issues; good practices (e.g. avoid hard-coding).
+   • 13–15.5: All expected functions; validation implemented; some good practices.
+   • 10–12.5: Data correctly inserted; basic functions working; minor issues or missing validation.
+   • 8–9.5: Some functionality but problems or data not correctly inserted; few good practices.
+   • 1–7.5: Form present and navigable but incomplete; almost no good practices.
+
+---
+
+TASK 2 PART C – Search form (20 marks)
+
+   • 16–20: Search fully functional; user can combine/mix options; well-executed UX; good practices and sensible methods.
+   • 13–15.5: Search fully functional with combine/mix options; easy to use; mostly good practices.
+   • 10–12.5: All 4 search options (ID, name, membership plan, payment plan) functioning with accurate results; combining not yet added; basic functionality; may have UX issues (e.g. no warning if no results); some good practices.
+   • 8–9.5: Some search functions working; some options incomplete or results inaccurate; few good practices.
+   • 1–7.5: Not all data retrievable; significant errors in results; almost no good practices.
+
+---
+
+TASK 2 PART D – Statistics form (20 marks)
+
+   • 16–20: Data retrieved and calculated correctly; displayed in appropriate format; form completely usable; good practices throughout.
+   • 13–15.5: Data retrieved and displayed as expected; no issues with results; some error checking; mostly good practices.
+   • 10–12.5: Data retrieved and displayed as expected; some minor calculation/output issues; some good practices.
+   • 8–9.5: Data retrieved and displayed but not all correct; few good practices.
+   • 1–7.5: Form created, some functionality attempted but significant errors or missing functionality; almost no good practices.

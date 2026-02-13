@@ -1,0 +1,33 @@
+Appendix B – Database Information
+==================================================
+
+BIT502 Assessment 3
+Appendix B
+Database information
+
+The database has been provided to you, along with the script that generated and populated
+the database. The file demonstrates how to connect to the database, insert records, and
+close the database. You will not need to generate a new database, but the query is available
+to understand how the database was created.
+
+Field Name          Data Type
+----------          ---------
+MemberID            (Primary key – handled automatically, do not insert)
+First_Name          Text
+Last_Name           Text
+Address             Text
+Mobile              Text
+Membership_Plan     Text
+Payment_Plan        Text
+Extra_Book_Rental    Boolean
+Extra_Private_Area   Boolean
+Extra_Booklet        Boolean
+Extra_Ebook_Rental   Boolean
+Has_Library_Card    Boolean
+Library_Card_Number  Text
+
+Notes:
+- You can reference the Appendix C Database Script for guidance on setting up the database.
+- MemberID is the primary key. It will be handled automatically. You do not need to insert a value for this field.
+- All fields are required for this database. The optional extras require a 0 or False if unselected. If no library card is used, the number should be an empty text string.
+- You can redownload the database if you make mistakes during development.

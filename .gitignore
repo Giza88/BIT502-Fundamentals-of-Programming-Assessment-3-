@@ -1,0 +1,8 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# SQLite WAL/shm (recreated at runtime)
+*.db-wal
+*.db-shm

@@ -1,0 +1,40 @@
+Appendix A – The Aurora Archive Membership Form
+==================================================
+
+BIT502 Appendix A
+The Aurora Archive
+Membership Form
+
+Customer details
+First name
+Last name
+Address
+Mobile number:
+
+Membership plan (please circle)
+Membership plan: [Standard ($10) / Premium ($15) / Kids ($5)]
+
+Payment plan (please circle)
+Payment plan: [Monthly / Annual]
+
+Extras (please circle)
+Book rental ($5 per week) Y / N
+Private area access ($15 per week) Y / N
+Monthly booklet ($2 per week) Y / N
+Online ebook rental ($5 per week) Y / N
+
+Library card (please check box and enter card number)
+Library card: [   ]
+Card ID: _____________________________
+
+Staff only
+Membership cost:
+Extra charges:
+Annual cost:
+---------------
+Total discount:
+---------------
+Total cost:
+
+* An annual subscription will receive one month free! Pay for only 11 months.
+** A valid library card will receive a 10% discount on the membership plan cost (Not extras)
