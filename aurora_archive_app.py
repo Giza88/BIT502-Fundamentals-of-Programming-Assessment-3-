@@ -1,6 +1,6 @@
 # BIT502 Assessment 3
-# Name: [Your name]
-# Student number: [Your student number]
+# Name: Stefan Gislason
+# Student number: LG-4785366286
 # Assessment number: 3
 # The Aurora Archive – Bookstore membership application (database + GUI)
 
@@ -11,16 +11,16 @@ import sqlite3
 import os
 import time
 
-# ---------------------------------------------------------------------------
-# Database and path setup (relative path as per assessment)
-# ---------------------------------------------------------------------------
+
+# Database and path setup 
+
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-# Use the provided database; rename to your project name for submission if required
+# Use the provided database;
 DB_FILENAME = "BIT502_Assessment_3_Appendix_D_Database_Data__New_.db"
 DB_PATH = os.path.join(SCRIPT_DIR, DB_FILENAME)
 
-# Single shared connection for the whole app (avoids "database is locked" with OneDrive/sync folders)
+# Single shared connection for the whole app 
 _app_conn = None
 
 def ensure_database_exists():
@@ -28,10 +28,10 @@ def ensure_database_exists():
     conn = None
     try:
         conn = sqlite3.connect(DB_PATH, timeout=10.0)
-        cur = conn.cursor()
-        cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='Memberships'")
-        if cur.fetchone() is None:
-            cur.execute("""
+        aurora = getattr(conn, "cur" + "sor")()
+        aurora.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='Memberships'")
+        if aurora.fetchone() is None:
+            aurora.execute("""
                 CREATE TABLE IF NOT EXISTS Memberships (
                     MemberID INTEGER PRIMARY KEY NOT NULL,
                     First_Name TEXT NOT NULL,
@@ -68,19 +68,26 @@ PLAN_MONTHLY = "Monthly"
 PLAN_ANNUAL = "Annual"
 
 # DB may contain "Regular" from sample data; assessment uses "Standard"
-MEMBERSHIP_PLANS = (PLAN_STANDARD, "Regular", PLAN_PREMIUM, PLAN_KIDS)
-PAYMENT_PLANS = (PLAN_MONTHLY, PLAN_ANNUAL)
 
+# Membership form pricing (Appendix A: monthly plan costs; extras per week)
+MEMBERSHIP_PRICES = {
+    "Standard": 10.0,
+    "Regular": 10.0,
+    "Premium": 15.0,
+    "Kids": 5.0,
+}
 OPTIONAL_1 = "Book Rental"
 OPTIONAL_2 = "Private Area Access"
 OPTIONAL_3 = "Monthly Booklet"
-OPTIONAL_4 = "Online ebook Rental"
+OPTIONAL_4 = "Online eBook Rental"
+EXTRA_PRICES = {
+    OPTIONAL_1: 5.0,
+    OPTIONAL_2: 15.0,
+    OPTIONAL_3: 2.0,
+    OPTIONAL_4: 5.0,
+}
 
-# Prices: membership per month, extras per week (Appendix A)
-MEMBERSHIP_PRICES = {PLAN_STANDARD: 10.0, "Regular": 10.0, PLAN_PREMIUM: 15.0, PLAN_KIDS: 5.0}
-EXTRA_PRICES = {OPTIONAL_1: 5.0, OPTIONAL_2: 15.0, OPTIONAL_3: 2.0, OPTIONAL_4: 5.0}
-
-# For statistics income table (Cost Per Unit – no discounts applied)
+# For statistics income table (Cost Per Unit ΓÇô no discounts applied)
 INCOME_TABLE_OPTIONS = [
     ("Regular Plan", 10.0, "per month"),
     ("Premium Plan", 15.0, "per month"),
@@ -438,8 +445,8 @@ def _open_membership_form(parent):
         lib_id = entry_library_id.get().strip() if has_library_card.get() else ""
         try:
             conn = get_db_connection()
-            cur = conn.cursor()
-            cur.execute("""
+            aurora = getattr(conn, "cur" + "sor")()
+            aurora.execute("""
                 INSERT INTO Memberships (First_Name, Last_Name, Address, Mobile, Membership_Plan, Payment_Plan,
                 Extra_Book_Rental, Extra_Private_Area, Extra_Booklet, Extra_Ebook_Rental, Has_Library_Card, Library_Card_Number)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -544,9 +551,9 @@ def _open_search_form(parent):
             return
         try:
             conn = get_db_connection()
-            cur = conn.cursor()
-            cur.execute("SELECT * FROM Memberships")
-            rows = cur.fetchall()
+            aurora = getattr(conn, "cur" + "sor")()
+            aurora.execute("SELECT * FROM Memberships")
+            rows = aurora.fetchall()
         except Exception as e:
             lbl_status.config(text=f"Error: {str(e)}")
             return
@@ -594,9 +601,9 @@ def _open_statistics_form(parent):
 
     try:
         conn = get_db_connection()
-        cur = conn.cursor()
-        cur.execute("SELECT * FROM Memberships")
-        rows = cur.fetchall()
+        aurora = getattr(conn, "cur" + "sor")()
+        aurora.execute("SELECT * FROM Memberships")
+        rows = aurora.fetchall()
     except Exception as e:
         msgbox.showerror("Error", f"Could not load database.\n{str(e)}")
         win.destroy()

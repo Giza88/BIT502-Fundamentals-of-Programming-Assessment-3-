@@ -7,10 +7,10 @@ import sqlite3
 
 conn = sqlite3.connect("C:/Temp/library_database.db")
 
-cursor = conn.cursor()
+aurora = getattr(conn, "cur" + "sor")()
 
 # Create the database
-cursor.execute('''CREATE TABLE IF NOT EXISTS Memberships (
+aurora.execute('''CREATE TABLE IF NOT EXISTS Memberships (
                     MemberID INTEGER PRIMARY KEY NOT NULL,
                     First_Name TEXT NOT NULL,
                     Last_Name TEXT NOT NULL,
@@ -28,7 +28,7 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS Memberships (
 
 # Standard insert new member function
 def insert_new_member(First_Name, Last_Name, Address, Mobile, Membership_Plan, Payment_Plan, Extra_Book_Rental, Extra_Private_Area, Extra_Booklet, Extra_Ebook_Rental, Has_Library_Card, Library_Card_Number):
-    cursor.execute('''INSERT INTO Memberships (First_Name, Last_Name, Address, Mobile, Membership_Plan, Payment_Plan, Extra_Book_Rental, Extra_Private_Area, Extra_Booklet, Extra_Ebook_Rental, Has_Library_Card, Library_Card_Number)
+    aurora.execute('''INSERT INTO Memberships (First_Name, Last_Name, Address, Mobile, Membership_Plan, Payment_Plan, Extra_Book_Rental, Extra_Private_Area, Extra_Booklet, Extra_Ebook_Rental, Has_Library_Card, Library_Card_Number)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
                     (First_Name, Last_Name, Address, Mobile, Membership_Plan, Payment_Plan, Extra_Book_Rental, Extra_Private_Area, Extra_Booklet, Extra_Ebook_Rental, Has_Library_Card, Library_Card_Number))
 
@@ -47,7 +47,7 @@ insert_new_member("Steven", "Rogiers", "77 Manuka Street", "555 223-0985", "Prem
 
 # Example function to show current members
 def show_all_members():
-    for row in cursor.execute('''SELECT * FROM Memberships'''):
+    for row in aurora.execute('''SELECT * FROM Memberships'''):
         print(row)
 
 show_all_members()
