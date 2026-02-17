@@ -893,7 +893,20 @@ Enter one or more criteria: Member ID, last name, membership plan, or payment pl
 Statistics form
 View total member count, counts by membership plan and payment plan, counts for each optional extra, how many members have no extras, and how many have a library card. The income table shows cost per option, how many members have that option, and total income (approximation; discounts are not applied).
     """
-    tk.Label(inner, text=text.strip(), justify="left", wraplength=420).pack(anchor="w")
+    # Use Text widget so headings can be bold and underlined
+    txt = tk.Text(inner, wrap="word", width=58, height=18, padx=4, pady=4, state="normal")
+    txt.pack(anchor="w", fill="both", expand=True)
+    txt.tag_configure("heading", font=("", 10, "bold"), underline=1)
+    txt.tag_configure("body", font=("", 9))
+    paragraphs = text.strip().split("\n\n")
+    for p in paragraphs:
+        parts = p.split("\n", 1)
+        title = parts[0].strip()
+        body = ("\n" + parts[1]).strip() if len(parts) > 1 else ""
+        txt.insert("end", title + "\n", "heading")
+        if body:
+            txt.insert("end", body + "\n\n", "body")
+    txt.config(state="disabled")
     tk.Button(inner, text="Back to menu", command=win.destroy).pack(anchor="w", pady=10)
 
 
