@@ -23,8 +23,24 @@ DB_PATH = os.path.join(SCRIPT_DIR, DB_FILENAME)
 # Single shared connection for the whole app 
 _app_conn = None
 
+# Sample members from Appendix C (assessment data) – inserted only when the table is empty
+_APPENDIX_C_MEMBERS = [
+    ("Charlie", "Zavier", "123 Maple Lane", "555 123-4567", "Premium", "Annual", 0, 1, 0, 0, 1, "39582"),
+    ("Scott", "Winters", "456 Oak Street", "555 123-5478", "Regular", "Monthly", 1, 0, 0, 1, 0, ""),
+    ("Jean", "Winters", "456 Oak Street", "555 123-7853", "Premium", "Annual", 1, 0, 0, 1, 1, "42678"),
+    ("Raven", "Whiteholm", "321 Birch Boulevard", "555 124-4127", "Premium", "Monthly", 1, 0, 0, 0, 1, "23789"),
+    ("Logan", "Howl", "654 Cedar Drive", "555 127-8543", "Regular", "Monthly", 0, 0, 1, 1, 0, ""),
+    ("Kurtis", "Vanger", "987 Spruce Way", "555 122-2289", "Regular", "Monthly", 0, 0, 0, 0, 0, ""),
+    ("Peter", "Driver", "246 Elm Court", "555 125-8873", "Kids", "Annual", 0, 1, 1, 1, 1, "89765"),
+    ("Eric", "Lensher", "135 Willow Road", "555 121-2398", "Premium", "Annual", 1, 1, 0, 0, 1, "33245"),
+    ("Nathaniel", "Winters", "456 Oak Street", "555 123-1299", "Kids", "Annual", 0, 0, 1, 1, 0, ""),
+    ("Cassandra", "Starr", "369 Chestnut Place", "555 157-3788", "Premium", "Annual", 0, 0, 1, 1, 1, "87965"),
+    ("Steven", "Rogiers", "77 Manuka Street", "555 223-0985", "Premium", "Monthly", 1, 0, 1, 1, 0, ""),
+]
+
 def ensure_database_exists():
-    """If the database file or Memberships table is missing, create it (same structure as Appendix C)."""
+    """If the database file or Memberships table is missing, create it (same structure as Appendix C).
+    If the Memberships table is empty, populate it with the assessment sample data from Appendix C."""
     conn = None
     try:
         conn = sqlite3.connect(DB_PATH, timeout=10.0)
@@ -49,6 +65,15 @@ def ensure_database_exists():
                 )
             """)
             conn.commit()
+        aurora.execute("SELECT COUNT(*) FROM Memberships")
+        if aurora.fetchone()[0] == 0:
+            for first, last, addr, mobile, plan, pay, e1, e2, e3, e4, has_card, card_no in _APPENDIX_C_MEMBERS:
+                aurora.execute("""
+                    INSERT INTO Memberships (First_Name, Last_Name, Address, Mobile, Membership_Plan, Payment_Plan,
+                    Extra_Book_Rental, Extra_Private_Area, Extra_Booklet, Extra_Ebook_Rental, Has_Library_Card, Library_Card_Number)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (first, last, addr, mobile, plan, pay, e1, e2, e3, e4, has_card, card_no))
+            conn.commit()
     finally:
         if conn is not None:
             conn.close()
@@ -57,9 +82,9 @@ def get_db_connection():
     """Return the single app-wide database connection. Do not close it."""
     return _app_conn
 
-# ---------------------------------------------------------------------------
+
 # Constants: membership plans and pricing (from Appendix A)
-# ---------------------------------------------------------------------------
+
 
 PLAN_STANDARD = "Standard"
 PLAN_PREMIUM = "Premium"
@@ -98,9 +123,7 @@ INCOME_TABLE_OPTIONS = [
     ("Online eBook Rental", 5.0, "per week"),
 ]
 
-# ---------------------------------------------------------------------------
 # Scrollable frame helper (Canvas + Scrollbar + inner Frame)
-# ---------------------------------------------------------------------------
 
 def _make_scrollable_frame(parent):
     """Returns (canvas, scrollbar, inner_frame). Pack canvas and scrollbar; put content in inner_frame."""
@@ -123,9 +146,7 @@ def _make_scrollable_frame(parent):
     return canvas, scrollbar, inner
 
 
-# ---------------------------------------------------------------------------
 # Main application window (menu screen)
-# ---------------------------------------------------------------------------
 
 def main():
     global _app_conn
@@ -224,11 +245,8 @@ def main():
 
     root.mainloop()
 
-
-# ---------------------------------------------------------------------------
 # Membership form (based on Assessment 2; saves to database)
 # Appendix A: library discount on membership plan only; annual = 11 months paid
-# ---------------------------------------------------------------------------
 
 def _open_membership_form(parent):
     win = tk.Toplevel(parent)
@@ -485,10 +503,7 @@ def _open_membership_form(parent):
 
     refresh_totals()
 
-
-# ---------------------------------------------------------------------------
 # Search form: ID, name, membership plan, payment plan; combinable; table
-# ---------------------------------------------------------------------------
 
 def _open_search_form(parent):
     win = tk.Toplevel(parent)
@@ -535,9 +550,23 @@ def _open_search_form(parent):
     tree.pack(side="left", fill="both", expand=True)
     scroll.pack(side="right", fill="y")
 
-    lbl_status = tk.Label(inner, text="Enter criteria and click Search.")
+    lbl_status = tk.Label(inner, text="All members are listed below. Use the search fields to filter, or leave them blank to see everyone.")
     lbl_status.pack(anchor="w", pady=2)
-    tk.Button(inner, text="Back to menu", command=win.destroy).pack(anchor="w", pady=5)
+
+    btn_row = tk.Frame(inner)
+    btn_row.pack(anchor="w", pady=5)
+    tk.Button(btn_row, text="Edit selected", command=lambda: open_edit()).pack(side="left", padx=(0, 8))
+    tk.Button(btn_row, text="Back to menu", command=win.destroy).pack(side="left")
+
+    def open_edit():
+        sel = tree.selection()
+        if not sel:
+            msgbox.showwarning("No selection", "Please select a member in the table to edit.")
+            return
+        item = tree.item(sel[0])
+        values = item["values"]
+        member_id = values[0]
+        _open_edit_member_dialog(win, member_id, on_saved=do_search)
 
     def do_search():
         for i in tree.get_children():
@@ -546,9 +575,7 @@ def _open_search_form(parent):
         name_val = entry_name.get().strip().lower()
         plan_val = var_plan.get().strip()
         pay_val = var_pay.get().strip()
-        if not any([id_val, name_val, plan_val, pay_val]):
-            lbl_status.config(text="Please enter at least one search criterion.")
-            return
+        has_criteria = any([id_val, name_val, plan_val, pay_val])
         try:
             conn = get_db_connection()
             aurora = getattr(conn, "cur" + "sor")()
@@ -557,18 +584,19 @@ def _open_search_form(parent):
         except Exception as e:
             lbl_status.config(text=f"Error: {str(e)}")
             return
-        # Filter: case-insensitive, partial match
+        # If no criteria entered, show all; otherwise filter (case-insensitive, partial match)
         result = []
         for r in rows:
             mid, first, last, addr, mobile, plan, pay, e1, e2, e3, e4, has_card, card_no = r
-            if id_val and (id_val not in str(mid)):
-                continue
-            if name_val and name_val not in last.lower():
-                continue
-            if plan_val and plan_val.lower() not in (plan or "").lower():
-                continue
-            if pay_val and pay_val.lower() not in (pay or "").lower():
-                continue
+            if has_criteria:
+                if id_val and (id_val not in str(mid)):
+                    continue
+                if name_val and name_val not in last.lower():
+                    continue
+                if plan_val and plan_val.lower() not in (plan or "").lower():
+                    continue
+                if pay_val and pay_val.lower() not in (pay or "").lower():
+                    continue
             extras = []
             if e1: extras.append("Book")
             if e2: extras.append("Private")
@@ -579,14 +607,189 @@ def _open_search_form(parent):
             tree.insert("", "end", values=r)
         if not result:
             lbl_status.config(text="No members found matching your criteria.")
-        else:
+        elif has_criteria:
             lbl_status.config(text=f"Found {len(result)} member(s).")
+        else:
+            lbl_status.config(text=f"Showing all members ({len(result)} total). Use the search fields above to filter.")
+
+    # Load all members as soon as the Search window opens (like the example: list everyone so you can browse)
+    do_search()
+
+# Edit member dialog: open from Search form; pre-fill and UPDATE by MemberID
+
+def _open_edit_member_dialog(parent, member_id, on_saved=None):
+    """Open a modal-like window to edit the member with the given MemberID. Optional on_saved() callback (e.g. refresh search)."""
+    try:
+        conn = get_db_connection()
+        aurora = getattr(conn, "cur" + "sor")()
+        aurora.execute("SELECT * FROM Memberships WHERE MemberID = ?", (member_id,))
+        row = aurora.fetchone()
+    except Exception as e:
+        msgbox.showerror("Error", f"Could not load member.\n\n{str(e)}")
+        return
+    if not row:
+        msgbox.showwarning("Not found", f"No member with ID {member_id}.")
+        return
+
+    (mid, first, last, addr, mobile, plan, pay, e1, e2, e3, e4, has_card, card_no) = row
+    card_no = card_no or ""
+
+    edit_win = tk.Toplevel(parent)
+    edit_win.title("Edit member – The Aurora Archive")
+    edit_win.geometry("460x420")
+    edit_win.resizable(True, True)
+    edit_win.configure(padx=12, pady=12)
+
+    f = tk.Frame(edit_win)
+    f.pack(fill="both", expand=True)
+
+    membership_plan = tk.StringVar(edit_win, plan if plan in (PLAN_STANDARD, PLAN_PREMIUM, PLAN_KIDS) else PLAN_STANDARD)
+    payment_plan = tk.StringVar(edit_win, pay if pay in (PLAN_MONTHLY, PLAN_ANNUAL) else PLAN_MONTHLY)
+    extra1 = tk.BooleanVar(edit_win, bool(e1))
+    extra2 = tk.BooleanVar(edit_win, bool(e2))
+    extra3 = tk.BooleanVar(edit_win, bool(e3))
+    extra4 = tk.BooleanVar(edit_win, bool(e4))
+    has_library_card = tk.BooleanVar(edit_win, bool(has_card))
+
+    row_num = 0
+    tk.Label(f, text="First name:").grid(row=row_num, column=0, sticky="w", pady=2)
+    entry_first = tk.Entry(f, width=32)
+    entry_first.grid(row=row_num, column=1, sticky="w", pady=2)
+    entry_first.insert(0, first or "")
+    row_num += 1
+
+    tk.Label(f, text="Last name:").grid(row=row_num, column=0, sticky="w", pady=2)
+    entry_last = tk.Entry(f, width=32)
+    entry_last.grid(row=row_num, column=1, sticky="w", pady=2)
+    entry_last.insert(0, last or "")
+    row_num += 1
+
+    tk.Label(f, text="Address:").grid(row=row_num, column=0, sticky="w", pady=2)
+    entry_address = tk.Entry(f, width=32)
+    entry_address.grid(row=row_num, column=1, sticky="w", pady=2)
+    entry_address.insert(0, addr or "")
+    row_num += 1
+
+    tk.Label(f, text="Mobile:").grid(row=row_num, column=0, sticky="w", pady=2)
+    entry_mobile = tk.Entry(f, width=32)
+    entry_mobile.grid(row=row_num, column=1, sticky="w", pady=2)
+    entry_mobile.insert(0, mobile or "")
+    row_num += 1
+
+    tk.Label(f, text="Membership plan:").grid(row=row_num, column=0, sticky="w", pady=2)
+    f_plan = tk.Frame(f)
+    f_plan.grid(row=row_num, column=1, sticky="w", pady=2)
+    tk.Radiobutton(f_plan, text=PLAN_STANDARD, variable=membership_plan, value=PLAN_STANDARD).pack(side="left")
+    tk.Radiobutton(f_plan, text=PLAN_PREMIUM, variable=membership_plan, value=PLAN_PREMIUM).pack(side="left")
+    tk.Radiobutton(f_plan, text=PLAN_KIDS, variable=membership_plan, value=PLAN_KIDS).pack(side="left")
+    row_num += 1
+
+    tk.Label(f, text="Payment plan:").grid(row=row_num, column=0, sticky="w", pady=2)
+    f_pay = tk.Frame(f)
+    f_pay.grid(row=row_num, column=1, sticky="w", pady=2)
+    tk.Radiobutton(f_pay, text=PLAN_MONTHLY, variable=payment_plan, value=PLAN_MONTHLY).pack(side="left")
+    tk.Radiobutton(f_pay, text=PLAN_ANNUAL, variable=payment_plan, value=PLAN_ANNUAL).pack(side="left")
+    row_num += 1
+
+    tk.Label(f, text="Optional extras:").grid(row=row_num, column=0, sticky="w", pady=2)
+    f_extras = tk.Frame(f)
+    f_extras.grid(row=row_num, column=1, sticky="w", pady=2)
+    tk.Checkbutton(f_extras, text=OPTIONAL_1, variable=extra1).pack(anchor="w")
+    tk.Checkbutton(f_extras, text=OPTIONAL_2, variable=extra2).pack(anchor="w")
+    tk.Checkbutton(f_extras, text=OPTIONAL_3, variable=extra3).pack(anchor="w")
+    tk.Checkbutton(f_extras, text=OPTIONAL_4, variable=extra4).pack(anchor="w")
+    row_num += 1
+
+    tk.Label(f, text="Library card:").grid(row=row_num, column=0, sticky="w", pady=2)
+    tk.Checkbutton(f, text="Has library card", variable=has_library_card).grid(row=row_num, column=1, sticky="w", pady=2)
+    row_num += 1
+    tk.Label(f, text="Card number:").grid(row=row_num, column=0, sticky="w", pady=2)
+    entry_library_id = tk.Entry(f, width=32)
+    entry_library_id.grid(row=row_num, column=1, sticky="w", pady=2)
+    entry_library_id.insert(0, card_no)
+    row_num += 1
+
+    def validate():
+        err = []
+        first = entry_first.get().strip()
+        last = entry_last.get().strip()
+        addr = entry_address.get().strip()
+        mobile = entry_mobile.get().strip()
+        lib_id = entry_library_id.get().strip()
+        if not first:
+            err.append("First name is required.")
+        if not last:
+            err.append("Last name is required.")
+        if not addr:
+            err.append("Address is required.")
+        if not mobile:
+            err.append("Mobile is required.")
+        if membership_plan.get() not in MEMBERSHIP_PRICES:
+            err.append("Please select a membership plan.")
+        if payment_plan.get() not in (PLAN_MONTHLY, PLAN_ANNUAL):
+            err.append("Please select a payment plan.")
+        if has_library_card.get():
+            if not lib_id:
+                err.append("Library card number is required when library card is selected.")
+            elif not lib_id.isdigit() or len(lib_id) != 5:
+                err.append("Library card ID must be a 5-digit number.")
+        if any(c.isdigit() for c in first):
+            err.append("First name must not contain numbers.")
+        if any(c.isdigit() for c in last):
+            err.append("Last name must not contain numbers.")
+        return err
+
+    def save():
+        err = validate()
+        if err:
+            msgbox.showwarning("Form errors", "\n".join(err))
+            return
+        plan_db = membership_plan.get()
+        if plan_db == "Regular":
+            plan_db = PLAN_STANDARD
+        pay = payment_plan.get()
+        lib_id = entry_library_id.get().strip() if has_library_card.get() else ""
+        try:
+            conn = get_db_connection()
+            aurora = getattr(conn, "cur" + "sor")()
+            aurora.execute("""
+                UPDATE Memberships SET
+                    First_Name = ?, Last_Name = ?, Address = ?, Mobile = ?,
+                    Membership_Plan = ?, Payment_Plan = ?,
+                    Extra_Book_Rental = ?, Extra_Private_Area = ?, Extra_Booklet = ?, Extra_Ebook_Rental = ?,
+                    Has_Library_Card = ?, Library_Card_Number = ?
+                WHERE MemberID = ?
+            """, (
+                entry_first.get().strip(),
+                entry_last.get().strip(),
+                entry_address.get().strip(),
+                entry_mobile.get().strip(),
+                plan_db,
+                pay,
+                1 if extra1.get() else 0,
+                1 if extra2.get() else 0,
+                1 if extra3.get() else 0,
+                1 if extra4.get() else 0,
+                1 if has_library_card.get() else 0,
+                lib_id,
+                member_id,
+            ))
+            conn.commit()
+        except Exception as e:
+            msgbox.showerror("Error", f"Could not save changes.\n\n{str(e)}")
+            return
+        msgbox.showinfo("Saved", "Member details updated successfully.")
+        if on_saved:
+            on_saved()
+        edit_win.destroy()
+
+    btn_frame = tk.Frame(edit_win)
+    btn_frame.pack(pady=12)
+    tk.Button(btn_frame, text="Save", command=save).pack(side="left", padx=4)
+    tk.Button(btn_frame, text="Cancel", command=edit_win.destroy).pack(side="left", padx=4)
 
 
-
-# ---------------------------------------------------------------------------
 # Statistics form: counts + income table
-# ---------------------------------------------------------------------------
 
 def _open_statistics_form(parent):
     win = tk.Toplevel(parent)
@@ -662,9 +865,7 @@ def _open_statistics_form(parent):
     tk.Button(inner, text="Back to menu", command=win.destroy).pack(anchor="w", pady=10)
 
 
-# ---------------------------------------------------------------------------
 # Help window
-# ---------------------------------------------------------------------------
 
 def _open_help_window(parent):
     win = tk.Toplevel(parent)
@@ -681,24 +882,22 @@ def _open_help_window(parent):
 How to use this application
 
 Main menu
-  Use the buttons to open the Membership form, Search members, Statistics, or this Help screen. Close any opened window to return to the main menu (or close the main window to exit the application).
+Use the buttons to open the Membership form, Search members, Statistics, or this Help screen. Close any opened window to return to the main menu (or close the main window to exit the application).
 
 Membership form
-  Enter the new member’s details: first name, last name, address, and mobile (all required). Choose a membership plan (Standard, Premium, or Kids) and payment plan (Monthly or Annual). Optionally select extras (book rental, private area, booklet, ebook) and/or a library card with a 5-digit card number. Click “Calculate totals” to see costs; click “Submit” to save the member to the database. The form clears only after a successful save. Fix any validation errors shown before submitting.
+Enter the new member’s details: first name, last name, address, and mobile (all required). Choose a membership plan (Standard, Premium, or Kids) and payment plan (Monthly or Annual). Optionally select extras (book rental, private area, booklet, ebook) and/or a library card with a 5-digit card number. Click “Calculate totals” to see costs; click “Submit” to save the member to the database. The form clears only after a successful save. Fix any validation errors shown before submitting.
 
 Search form
-  Enter one or more criteria: Member ID, last name, membership plan, or payment plan. You can combine options to narrow results. Click “Search”. Results appear in the table. If no members match, a message is shown. Search is case-insensitive and supports partial matches (e.g. part of a last name).
+Enter one or more criteria: Member ID, last name, membership plan, or payment plan. You can combine options to narrow results. Click “Search”. All members are listed as soon as you open the form, so you can browse without searching. Use the search fields to filter by Member ID, last name, membership plan, or payment plan, then click "Search". To edit a member, select a row and click "Edit selected"; change the details in the pop-up and click "Save". Search is case-insensitive and supports partial matches (e.g. part of a last name).
 
 Statistics form
-  View total member count, counts by membership plan and payment plan, counts for each optional extra, how many members have no extras, and how many have a library card. The income table shows cost per option, how many members have that option, and total income (approximation; discounts are not applied).
+View total member count, counts by membership plan and payment plan, counts for each optional extra, how many members have no extras, and how many have a library card. The income table shows cost per option, how many members have that option, and total income (approximation; discounts are not applied).
     """
     tk.Label(inner, text=text.strip(), justify="left", wraplength=420).pack(anchor="w")
     tk.Button(inner, text="Back to menu", command=win.destroy).pack(anchor="w", pady=10)
 
 
-# ---------------------------------------------------------------------------
 # Entry point
-# ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
     main()
