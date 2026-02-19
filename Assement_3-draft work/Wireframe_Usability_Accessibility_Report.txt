@@ -1,0 +1,43 @@
+================================================================================
+BIT502 Assessment 3 – Wireframe usability and accessibility explanation
+(Place this in your Word document with your wireframe diagrams)
+================================================================================
+
+Usability and accessibility of the wireframes
+---------------------------------------------
+
+The wireframes for The Aurora Archive application are designed to be both usable and accessible. This section explains how the design supports these goals.
+
+Usability
+---------
+The wireframes are usable because they make the application easy to understand and use.
+
+• Clear navigation: The main window acts as a single hub with four clearly labelled buttons (Membership form, Search members, Statistics, Help). Each button leads to one screen, and each sub-screen has a "Back to menu" (or equivalent) control so users can always return without getting lost.
+
+• One main task per screen: Each form has a single purpose—new membership, search, statistics, or help—so users are not overwhelmed and know what to do on each screen.
+
+• Logical layout: On the New Membership form, fields follow a sensible order (name, contact, plan, payment, extras, library card, then totals and actions). On the Search form, criteria are at the top and results below, with Edit and Back options clearly visible. This matches how people expect to work: enter information, then act.
+
+• Visible actions: Buttons such as "Calculate Totals", "Submit", "Search", "Edit Selected", and "Back to Menu" are shown on the wireframes so users can see what actions are available. Labels are plain language (e.g. "Search members", "Back to Menu") so no guessing is required.
+
+• Feedback implied by layout: The Membership form includes a totals section; the Search form includes a results table and "Show all members"; the Statistics form shows counts and an income table. These elements indicate that the application will show users the outcome of their actions (e.g. calculated cost, search results, statistics).
+
+Accessibility
+-------------
+The wireframes support accessibility in several ways.
+
+• Consistent structure: The same pattern is used across screens—title/heading at the top, main content in the middle, and a clear way back to the main menu. This consistency helps all users, including those using assistive technologies or who need a predictable layout.
+
+• Labelled controls: Every input and action has a text label (First Name, Last Name, Membership plan, Payment plan, Search, Back to Menu, etc.). In a built interface, these can be associated with the correct controls so screen readers and keyboard users can understand and operate the form.
+
+• Grouping of related items: Membership plan options, payment options, optional extras, and library card details are grouped on the wireframes. When implemented, such grouping (e.g. with headings or fieldsets) improves navigation for assistive technology users and makes the form easier to scan for everyone.
+
+• Readable hierarchy: The wireframes show a clear visual hierarchy (e.g. main window → four choices; each form with a title, content area, and buttons). When implemented with proper headings and contrast, this supports users who rely on structure and clarity.
+
+Conclusion
+----------
+These wireframes are usable because they provide clear navigation, one main task per screen, logical layout, visible actions, and space for feedback. They are accessible because they use a consistent structure, labelled controls, grouped related items, and a clear hierarchy that can be implemented in an accessible way. Together, this design helps all users complete tasks (adding members, searching, viewing statistics, getting help) with minimal confusion and with support for assistive technologies where the final GUI is built with accessibility in mind.
+
+================================================================================
+End of report text – copy into your Word document and adjust formatting as needed.
+================================================================================
